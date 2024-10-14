@@ -1,73 +1,55 @@
-# 專案概述
+# IOT_Smart_Home
 
-此專案分為三個主要部分：`arduino_CameraServer`、`arduino_main` 和 `Smart-home`。每個資料夾包含不同的功能，協同完成整體專案目標。
+此專案為一個智慧家庭系統，透過 Arduino 與 Swift 應用來控制及監測家庭環境。專案包含三個主要部分：
+- **arduino_CameraServer**: 基於 Arduino 的攝影機伺服器
+- **arduino_main**: 主要 Arduino 控制邏輯
+- **Smart-home**: 使用 Swift 開發的智慧家庭應用程式
 
-## 1. arduino_CameraServer
+## 專案目錄
 
-### 說明：
-該部分包含與相機伺服器設置相關的 Arduino 程式碼，負責實時串流和相機控制功能。
+### arduino_CameraServer
+此部分是基於 Arduino 的攝影機伺服器，負責透過網路提供即時影像串流功能。
 
-### 主要功能：
-- 使用 ESP32-CAM 進行串流。
-- 建立 HTTP 伺服器以托管相機畫面。
-- 基本的相機設定控制（解析度、亮度等）。
+- **app_httpd.cpp**: 網頁伺服器的實作，負責影像串流。
+- **arduino_CameraServer.ino**: Arduino 主程式檔。
+- **camera_index.h**: 定義網頁伺服器的首頁內容。
+- **camera_pins.h**: 定義攝影機的引腳配置。
+- **ci.json**: 設定文件。
+- **partitions.csv**: 記憶體分區配置表。
 
-### 內容：
-- **`camera_server.ino`**：初始化並控制 ESP32-CAM 伺服器的主程式。
-- **`config.h`**：相機與網路設定的配置檔案。
+### arduino_main
+此部分包含所有與感測器和 Wi-Fi 網路相關的控制邏輯。
 
----
+- **SP.cpp / SP.h**: 控制感測器的邏輯與數據讀取。
+- **SensorManager.cpp / SensorManager.h**: 管理各種感測器的數據。
+- **WiFiWebSocket.cpp / WiFiWebSocket.h**: 使用 WebSocket 通訊的網路管理模組。
+- **arduino_main.ino**: 主程式文件，負責與 Swift 應用進行通訊並控制感測器和設備。
 
-## 2. arduino_main
+### Smart-home (Swift App)
+此部分是智慧家庭應用的 iOS 前端，透過 WebSocket 與 Arduino 通訊，實現即時數據顯示與控制功能。
 
-### 說明：
-這部分包含 Arduino 系統的核心功能，主要關注於感測器數據讀取和設備控制。
+- **ContentView.swift**: 主要的 SwiftUI 檢視。
+- **HomeView.swift**: 應用的主畫面。
+- **ListView.swift**: 顯示感測器數據的列表視圖。
+- **MoreView.swift**: 設定頁面。
+- **StreamingView.swift**: 即時影像串流的檢視。
+- **WebSocketManager.swift**: WebSocket 連接與管理。
 
-### 主要功能：
-- 感測器整合，用於監測環境參數。
-- 控制致動器（如燈光、馬達、開關等）。
-- 與其他模組或伺服器進行通訊。
+## 如何運行
 
-### 內容：
-- **`main.ino`**：負責處理感測器數據讀取與致動器控制的主要 Arduino 程式。
-- **`sensor_utils.h`**：與感測器互動的輔助函式。
-- **`actuator_control.h`**：控制各種致動器（如燈光、馬達等）的程式碼。
+### 硬體要求
+- **ESP32-CAM**: 用於影像串流
+- **Arduino**: 連接各種感測器與控制元件
+- **感測器**: 溫度、氧氣、pH值等感測器
 
----
+### 軟體要求
+- **Arduino IDE**: 編譯與上傳 Arduino 程式碼
+- **Xcode**: 編譯與運行 Swift 應用程式
+- **Django**: 作為後端服務
 
-## 3. Smart-home
+### 部署步驟
 
-### 說明：
-此資料夾包含使用 Swift 開發的智慧家庭控制應用程式，該應用程式負責提供使用者介面，讓用戶通過手機控制和監控家庭自動化設備。
+1. 在 Arduino IDE 中開啟 `arduino_main.ino` 與 `arduino_CameraServer.ino`，並上傳至 ESP32 和 Arduino 板。
+2. 使用 Xcode 編譯並運行 Swift 應用，確保手機與 Arduino 在同一網路下。
+3. 確認感測器數據可以透過 WebSocket 連接顯示在應用程式上，並且影像串流功能正常運作。
 
-### 主要功能：
-- 控制家庭自動化設備（如燈光、溫度控制等）。
-- 與 Arduino 裝置進行即時通訊，接收感測器數據並發送控制命令。
-- 提供直觀的介面以顯示感測器數據和設備狀態。
-
-### 內容：
-- **`SmartHome.xcodeproj`**：Swift App 的 Xcode 專案檔案。
-- **`ViewController.swift`**：主視圖控制器，處理介面邏輯和用戶交互。
-- **`WebSocketManager.swift`**：處理 WebSocket 連接，與後端伺服器或 Arduino 裝置通訊。
-- **`Models/`**：包含應用程式使用的數據模型，管理感測器數據和設備狀態。
-
----
-
-## 開始使用
-
-1. **設置 Arduino 相機伺服器**：
-   - 將 `camera_server.ino` 上傳至你的 ESP32-CAM 設備。
-   - 在 `config.h` 中配置網路設定。
-   - 啟動伺服器，並通過瀏覽器訪問串流畫面。
-
-2. **運行主要 Arduino 程式**：
-   - 將 `main.ino` 上傳至管理感測器和致動器的 Arduino 板。
-   - 確保所有感測器和設備均正確連接。
-
-3. **使用 Smart-home App**：
-   - 使用 Xcode 開啟 `SmartHome.xcodeproj` 專案。
-   - 編譯並安裝應用程式至 iOS 設備。
-   - 啟動應用程式，並通過 WebSocket 與 Arduino 裝置進行即時通訊，實現對家庭自動化系統的控制。
-
-## 授權
-本專案依照 MIT 授權條款授權使用，詳情請參閱 [LICENSE](LICENSE) 文件。
